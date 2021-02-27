@@ -24,7 +24,6 @@ let metadataTimer;
 let nowPlaying = new Metadata();
 
 io.attach(server, {
-  // cors: { origin: `http://127.0.0.1:8080`, methods: ["GET"] }
   transports: ['websocket', 'xhr-polling']
 });
 
@@ -40,8 +39,8 @@ io.on('connection', function(socket) {
   })
 });
 
-server.listen(Config.util.getEnv('PORT'), () => {
-  console.log(`Socket IO server listening on ${Config.util.getEnv('PORT')}`);
+server.listen(Config.Port, () => {
+  console.log(`Socket IO server listening on ${Config.Port}`);
   updateMetadata();
 });
 

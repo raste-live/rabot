@@ -3,24 +3,22 @@ module.exports = {
     name: 'app',
     script: './app.js',
     env: {
-      NODE_ENV: "development",
-      PORT: 3000,
+      NODE_ENV: "development"
     },
     env_production: {
-      NODE_ENV: "production",
-      PORT: 3009,
+      NODE_ENV: "production"
     }
   }],
 
   deploy : {
     production : {
       user : 'ubuntu',
-      host : 'broadcast.raste.live',
+      host : '52.79.158.156',
       ref  : 'origin/main',
       repo : 'git@github.com:raste-live/rabot.git',
       path : '/var/app/rabot',
-      'pre-deploy-local': '',
-      'post-deploy' : 'npm install && pm2 reload ecosystem.config.js --env production',
+      'pre-deploy-local': 'scp -r ./config ubuntu@52.79.158.156:/var/app/rabot/shared',
+      'post-deploy' : 'ln -s ../shared/config config; npm install && pm2 reload ecosystem.config.cjs --env production',
       'pre-setup': ''
     }
   }
