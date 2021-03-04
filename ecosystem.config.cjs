@@ -18,8 +18,8 @@ module.exports = {
       repo : 'git@github.com:raste-live/rabot.git',
       path : '/var/app/rabot',
       'pre-deploy-local': 'scp -r ./config ubuntu@52.79.158.156:/var/app/rabot/shared',
-      'post-deploy' : 'ln -s ../shared/config config; npm install && pm2 reload ecosystem.config.cjs --env production',
-      'pre-setup': ''
+      'post-deploy' : 'npm install && pm2 reload ecosystem.config.cjs --env production',
+      'post-setup': 'mkdir ../shared/config; ln -s ../shared/config config'
     }
   }
 };
