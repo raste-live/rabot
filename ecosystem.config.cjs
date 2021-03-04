@@ -1,3 +1,5 @@
+const config = require('config');
+
 module.exports = {
   apps : [{
     name: 'app',
@@ -12,13 +14,13 @@ module.exports = {
 
   deploy : {
     production : {
-      user : 'ubuntu',
-      host : '52.79.158.156',
+      user : config.Deployment.User,
+      host : config.Deployment.Host,
+      path : config.Deployment.Path,
       ref  : 'origin/main',
       repo : 'git@github.com:raste-live/rabot.git',
-      path : '/var/app/rabot',
       'pre-deploy-local': 'scp -r ./config ubuntu@52.79.158.156:/var/app/rabot/shared',
-      'post-deploy' : 'npm install && pm2 reload ecosystem.config.cjs --env production',
+      'post-deploy' : 'npm install && pm2 startOrRestart app.js --env production',
       'post-setup': 'mkdir ../shared/config; ln -s ../shared/config config'
     }
   }
