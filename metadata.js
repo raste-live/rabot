@@ -31,18 +31,17 @@ export default class Metadata {
     this.text = text;
 
     if (this.isMetadataChanged()) {
-      let delimeterIndex = text.indexOf(this.delimeter);
+      let splitedText = text.split(this.delimeter);
 
-      if (delimeterIndex >= 0) {
-        this.title = text.substr(delimeterIndex + this.delimeter.length);
-        this.artist = text.substr(0, delimeterIndex);
-        this.query = encodeURIComponent(this.title.concat(this.delimeter, this.artist).substring(0, 128)).replace(/\(/g,'%28').replace(/\)/g,'%29');
+      if (splitedText.length > 1) {
+        this.artist = splitedText.pop()
+        this.title = splitedText.join(this.delimeter);
       } else {
-        this.title = text
         this.artist = ''
-        this.query = encodeURIComponent(this.title.substring(0, 128)).replace(/\(/g,'%28').replace(/\)/g,'%29');
+        this.title = text
       }
 
+      this.query = encodeURIComponent(this.text.substring(0, 128)).replace(/\(/g,'%28').replace(/\)/g,'%29');
       this.playedAt = new Date();
     }
   }
