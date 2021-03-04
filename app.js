@@ -4,7 +4,7 @@ import * as Http from 'http';
 import * as SocketIo from 'socket.io';
 import { Client } from 'discord.js';
 import axios from 'axios';
-import Metadata from './metadata.js'
+import Metadata from './metadata.js';
 
 import * as Sentry from '@sentry/node';
 import * as Tracing from "@sentry/tracing";
@@ -141,5 +141,5 @@ function updateMetadata () {
       }
     })
     .catch((error) => Sentry.captureException(error))
-    .finally(() => metadataTimer = setTimeout(updateMetadata, Config.Metadata.Interval))
+    .finally(() => metadataTimer = setTimeout(updateMetadata, Config.Metadata.Interval));
 }

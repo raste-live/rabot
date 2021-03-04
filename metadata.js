@@ -1,8 +1,10 @@
+import crypto from 'crypto';
+
 export default class Metadata {
 
   constructor(options = {}) {
-    this.messages = []
-    this.delimeter = options.delimeter ?? ' - '
+    this.messages = [];
+    this.delimeter = options.delimeter ?? ' - ';
   }
 
   isMetadataChanged () {
@@ -34,21 +36,25 @@ export default class Metadata {
       let splitedText = text.split(this.delimeter);
 
       if (splitedText.length > 1) {
-        this.artist = splitedText.pop()
+        this.artist = splitedText.pop();
         this.title = splitedText.join(this.delimeter);
       } else {
-        this.artist = ''
-        this.title = text
+        this.artist = '';
+        this.title = text;
       }
 
-      this.query = encodeURIComponent(this.text.substring(0, 128)).replace(/\(/g,'%28').replace(/\)/g,'%29');
       this.playedAt = new Date();
+
+      this.query = encodeURIComponent(this.text.substring(0, 128)).replace(/\(/g,'%28').replace(/\)/g,'%29');
+
+      this.id = crypto.createHash('md5').update(text).digest('hex');
     }
   }
 
   getJSON () {
     return {
       is_stream_offline: this.isStreamOffline(),
+      id: this.id,
       title: this.title,
       artist: this.artist,
       text: this.text,
