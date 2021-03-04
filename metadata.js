@@ -1,11 +1,12 @@
 export default class Metadata {
 
-  constructor() {
+  constructor(options = {}) {
     this.messages = []
+    this.delimeter = options.delimeter ?? ' - '
   }
 
   isMetadataChanged () {
-    return this.previousId != this.id;
+    return this.previousText != this.text;
   }
 
   isListenersChanged () {
@@ -13,12 +14,11 @@ export default class Metadata {
   }
 
   isStreamOffline () {
-    return this.id == 0;
+    return this.status == 0;
   }
 
-  setId (id) {
-    this.previousId = this.id;
-    this.id = id;
+  setStatus (status) {
+    this.status = status;
   }
 
   setListeners (listeners) {
@@ -26,12 +26,25 @@ export default class Metadata {
     this.listeners = listeners;
   }
 
-  setSongInfo (title, artist, playedAt) {
-    this.title = title;
-    this.artist = artist;
-    this.playedAt = playedAt == 0 ? new Date() : new Date(playedAt * 1000);
-    this.text = this.title.concat(' - ', this.artist);
-    this.query = encodeURIComponent(this.text.substring(0, 128)).replace(/\(/g,'%28').replace(/\)/g,'%29');
+  setSongInfo (text) {
+    this.previousText = this.text;
+    this.text = text;
+
+    if (this.isMetadataChanged()) {
+      let delimeterIndex = text.indexOf(this.delimeter);
+
+      if (delimeterIndex >= 0) {
+        this.title = text.substr(delimeterIndex + this.delimeter.length);
+        this.artist = text.substr(0, delimeterIndex);
+        this.query = encodeURIComponent(this.title.concat(this.delimeter, this.artist).substring(0, 128)).replace(/\(/g,'%28').replace(/\)/g,'%29');
+      } else {
+        this.title = text
+        this.artist = ''
+        this.query = encodeURIComponent(this.title.substring(0, 128)).replace(/\(/g,'%28').replace(/\)/g,'%29');
+      }
+
+      this.playedAt = new Date();
+    }
   }
 
   getJSON () {
@@ -42,7 +55,7 @@ export default class Metadata {
       text: this.text,
       played_at: this.playedAt,
       query: this.query,
-      listeners: this.listeners
+      listeners: this.listeners,
     };
   }
 }

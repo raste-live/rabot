@@ -128,9 +128,9 @@ function refreshMessage (message) {
 function updateMetadata () {
   axios.get(Config.Metadata.API)
     .then(({ data }) => {
-      nowPlaying.setId(data.now_playing.sh_id);
-      nowPlaying.setListeners(data.listeners.current);
-      nowPlaying.setSongInfo(data.now_playing.song.title, data.now_playing.song.artist, data.now_playing.played_at);
+      nowPlaying.setStatus(data.streamstatus);
+      nowPlaying.setListeners(data.currentlisteners);
+      nowPlaying.setSongInfo(data.songtitle);
       
       if (nowPlaying.isMetadataChanged()) {
         bot.emit('metadata', nowPlaying.getJSON());
