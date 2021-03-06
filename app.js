@@ -19,9 +19,10 @@ const app = express();
 const server = Http.createServer(app);
 const io = new SocketIo.Server();
 const bot = new Client();
+const metadata = new Metadata();
+const messages = [];
 
 let metadataTimer;
-let nowPlaying = new Metadata();
 
 io.attach(server, {
   transports: ['websocket', 'xhr-polling']
@@ -29,7 +30,11 @@ io.attach(server, {
 
 io.on('connection', function(socket) {
   socket.on('metadata', () => {
-    io.emit('metadata', nowPlaying.getJSON());
+    io.emit('metadata', metadata.current);
+  });
+
+  socket.on('history', () => {
+    io.emit('history', metadata.history);
   });
 
   socket.on('refreshMetadata', () => {
@@ -48,19 +53,19 @@ bot
   .on('ready', () => {
     console.log(`Logged in as ${bot.user.tag}!`);
 
-    bot.emit('metadata', nowPlaying.getJSON());
+    bot.emit('metadata', metadata.current);
   })
-  .on('metadata', (metadata) => {
+  .on('metadata', (data) => {
     // History
     bot.channels.fetch(Config.Discord.MetaChannelId)
       .then((channel) => {
         if (!channel) return;
         
-        if (!metadata.is_stream_offline) {
+        if (!data.is_stream_offline) {
           channel.send({embed: {
             color: 0x33AFFF,
-            description: metadata.text,
-            timestamp: metadata.played_at,
+            description: data.text,
+            timestamp: data.played_at,
             footer: { text: 'Played at' },
           }});
         }
@@ -72,18 +77,18 @@ bot
       .then((channel) => {
         if (!channel) return;
 
-        if (!metadata.is_stream_offline) {
+        if (!data.is_stream_offline) {
           channel.send({embed: {
             color: 0x33AFFF,
             title: ':musical_note:  Now Playing',
-            description: metadata.text,
+            description: data.text,
             fields: [{
               name: ':mag: Search',
-              value: `[Google](https://google.com/search?q=${metadata.query})`,
+              value: `[Google](https://google.com/search?q=${data.query})`,
               inline: true,
             }, {
               name: 'ㅤ',
-              value: `[Youtube](https://youtube.com/results?search_query=${metadata.query})`,
+              value: `[Youtube](https://youtube.com/results?search_query=${data.query})`,
               inline: true,
             }, {
               name: ':clipboard: History',
@@ -94,7 +99,7 @@ bot
               value: `[청취하기](${Config.Homepage})`,
               inline: true,
             }],
-            timestamp: metadata.played_at,
+            timestamp: data.played_at,
             footer: { text: 'Played at' },
           }}).then((message) => refreshMessage(message));
         } else {
@@ -107,7 +112,7 @@ bot
               value: `<#${Config.Discord.MetaChannelId}>`,
               inline: true,
             }],
-            timestamp: metadata.played_at,
+            timestamp: data.played_at,
             footer: { text: 'Played at' },
           }}).then((message) => refreshMessage(message));
         }
@@ -118,26 +123,24 @@ bot
 bot.login(Config.Discord.Token);
 
 function refreshMessage (message) {
-  nowPlaying.messages.unshift(message);
+  messages.unshift(message);
 
-  if (nowPlaying.messages.length > 1) {
-    nowPlaying.messages.pop().delete().catch(console.error);
+  if (messages.length > 1) {
+    messages.pop().delete().catch(console.error);
   }
 }
 
 function updateMetadata () {
   axios.get(Config.Metadata.API)
     .then(({ data }) => {
-      nowPlaying.setStatus(data.streamstatus);
-      nowPlaying.setListeners(data.currentlisteners);
-      nowPlaying.setSongInfo(data.songtitle);
+      metadata.setSongInfo(data.streamstatus, data.songtitle, data.currentlisteners);
       
-      if (nowPlaying.isMetadataChanged()) {
-        bot.emit('metadata', nowPlaying.getJSON());
+      if (metadata.isMetadataChanged()) {
+        bot.emit('metadata', metadata.current);
       } 
 
-      if (nowPlaying.isMetadataChanged() || nowPlaying.isListenersChanged()) {
-        io.emit('metadata', nowPlaying.getJSON());
+      if (metadata.isMetadataChanged() || metadata.isListenersChanged()) {
+        io.emit('metadata', metadata.current);
       }
     })
     .catch((error) => Sentry.captureException(error))
