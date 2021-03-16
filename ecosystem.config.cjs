@@ -19,7 +19,7 @@ module.exports = {
       path : cfg.Deployment.Path,
       ref  : 'origin/main',
       repo : 'git@github.com:raste-live/rabot.git',
-      'pre-deploy-local': 'scp -r ./config ubuntu@52.79.158.156:/var/app/rabot/shared',
+      'pre-deploy-local': `scp -r ./config ${cfg.Deployment.User}@${cfg.Deployment.Host}:${cfg.Deployment.Path}/shared`,
       'post-deploy' : 'npm install && pm2 restart ecosystem.config.cjs --env production',
       'post-setup': 'mkdir ../shared/config; ln -s ../shared/config config'
     }
