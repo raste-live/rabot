@@ -80,33 +80,38 @@ bot
         if (!data.is_stream_offline) {
           channel.send({embed: {
             color: 0x33AFFF,
-            title: ':musical_note:  Now Playing',
+            title: ':mag: Search on Google',
+            url: `https://google.com/search?q=${data.query}`,
             description: data.text,
-            fields: [{
-              name: ':mag: Search',
-              value: `[Google](https://google.com/search?q=${data.query})`,
-              inline: true,
-            }, {
-              name: 'ㅤ',
-              value: `[Youtube](https://youtube.com/results?search_query=${data.query})`,
-              inline: true,
-            }, {
-              name: ':clipboard: History',
-              value: `<#${Config.Discord.MetaChannelId}>`,
-              inline: true,
-            }, {
-              name: ':arrow_forward: Streaming',
-              value: `[청취하기](${Config.Homepage})`,
-              inline: true,
-            }],
+            author: {
+              name: 'Now Playing',
+              url: Config.Homepage,
+              icon_url: Config.HomepageIcon,
+            },
+            fields: [
+              {
+                name: ':arrow_forward: Streaming',
+                value: `[청취하기](${Config.Homepage})`,
+                inline: true,
+              },
+              {
+                name: ':clipboard: History',
+                value: `<#${Config.Discord.MetaChannelId}>`,
+                inline: true,
+              }
+            ],
             timestamp: data.played_at,
             footer: { text: 'Played at' },
           }}).then((message) => refreshMessage(message));
         } else {
           channel.send({embed: {
             color: 0x33AFFF,
-            title: ':musical_note:  Now Playing',
-            description: '현재 방송중이 아닙니다',
+            title: '현재 방송중이 아닙니다',
+            author: {
+              name: 'Now Playing',
+              url: Config.Homepage,
+              icon_url: Config.HomepageIcon,
+            },
             fields: [{
               name: ':clipboard: History',
               value: `<#${Config.Discord.MetaChannelId}>`,
