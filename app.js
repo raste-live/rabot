@@ -25,7 +25,10 @@ const messages = [];
 let metadataTimer;
 
 io.attach(server, {
-  transports: ['websocket', 'xhr-polling']
+  transports: ['websocket', 'xhr-polling'],
+  cors: {
+    origin: ['http://localhost:*', 'https://raste.live:*']
+  }
 });
 
 io.on('connection', function(socket) {
